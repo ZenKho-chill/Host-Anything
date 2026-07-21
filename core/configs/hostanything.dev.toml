@@ -1,0 +1,25 @@
+# hostanything development configuration
+# Copy this file to /etc/hostanything/hostanything.toml on production.
+# DO NOT commit real jwt_secret values to version control.
+
+[server]
+api_port     = 8080
+bind_address = "127.0.0.1"
+log_level    = "debug"
+
+[auth]
+# IMPORTANT: Replace with a strong random secret before deploying.
+# Generate one with: openssl rand -hex 32
+jwt_secret       = "dev-only-secret-change-before-deploy"
+session_timeout  = "24h"
+fail2ban_enabled = false
+
+[runtimes]
+docker_enabled = true
+podman_enabled = false
+k8s_enabled    = false
+host_enabled   = true
+
+[paths]
+data_dir     = "/tmp/hostanything/data"
+template_dir = "/tmp/hostanything/templates"

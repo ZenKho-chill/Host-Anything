@@ -12,11 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package api contains the HTTP handler functions for the hostanything REST API.
-// Handlers are pure functions that accept dependencies as parameters and return
-// [http.HandlerFunc] values. No business logic lives here — all logic is
-// delegated to internal service packages.
+// Package logging provides structured JSON logging for the hostanything daemon.
+// It wraps the standard library's [log/slog] package with opinionated defaults
+// suitable for a long-running system service on Debian.
 //
-// All endpoints are defined in SPEC-004. Route registration is handled by
-// [github.com/host-anything/hostanything/internal/server].
-package api
+// Logs are written in JSON format to stderr for machine-readability and
+// fail2ban compatibility. The auth log format is defined in SPEC-030.
+//
+// Usage:
+//
+//	logger, err := logging.NewLogger("info")
+//	if err != nil {
+//	    log.Fatalf("failed to init logger: %v", err)
+//	}
+//	logger.Info("server started", "address", ":8080")
+package logging

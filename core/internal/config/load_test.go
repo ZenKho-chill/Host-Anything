@@ -1,0 +1,177 @@
+// Copyright 2026 Host Anything Contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package config_test
+
+import (
+	"os"
+	"testing"
+
+	"github.com/host-anything/hostanything/internal/config"
+	"github.com/host-anything/hostanything/pkg/errors"
+)
+
+// writeTemp writes content to a temporary TOML file.
+// The file is automatically removed when the test finishes.
+func writeTemp(t *testing.T, content string) string {
+	t.Helper()
+
+	f, err := os.CreateTemp("", "hostanything-config-*.toml")
+	if err != nil {
+		t.Fatalf("writeTemp: create temp file: %v", err)
+	}
+	t.Cleanup(func() { os.Remove(f.Name()) })
+
+	if _, err := f.WriteString(content); err != nil {
+		t.Fatalf("writeTemp: write content: %v", err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatalf("writeTemp: close file: %v", err)
+	}
+
+	return f.Name()
+}
+
+func TestLoad_ValidFullConfig(t *testing.T) {
+	content := `
+[server]
+api_port     = 9090
+bind_address = "0.0.0.0"
+log_level    = "debug"
+
+[auth]
+jwt_secret       = "supersecretkey"
+session_timeout  = "12h"
+fail2ban_enabled = true
+
+[runtimes]
+docker_enabled = true
+podman_enabled = false
+k8s_enabled    = false
+host_enabled   = true
+
+[paths]
+data_dir     = "/tmp/ha-data"
+template_dir = "/tmp/ha-templates"
+`
+	path := writeTemp(t, content)
+
+	cfg, err := config.Load(path)
+	if err != nil {
+		t.Fatalf("expected no error for valid config, got: %v", err)
+	}
+	if cfg.Server.APIPort != 9090 {
+		t.Errorf("expected api_port=9090, got %d", cfg.Server.APIPort)
+	}
+	if cfg.Server.LogLevel != "debug" {
+		t.Errorf("expected log_level=debug, got %q", cfg.Server.LogLevel)
+	}
+	if cfg.Auth.JWTSecret != "supersecretkey" {
+		t.Errorf("expected jwt_secret=supersecretkey, got %q", cfg.Auth.JWTSecret)
+	}
+	if !cfg.Runtimes.DockerEnabled {
+		t.Error("expected docker_enabled=true")
+	}
+}
+
+func TestLoad_AppliesDefaults_WhenFieldsMissing(t *testing.T) {
+	// Minimal config: only jwt_secret is required with no default.
+	content := `
+[auth]
+jwt_secret = "testsecret"
+`
+	path := writeTemp(t, content)
+
+	cfg, err := config.Load(path)
+	if err != nil {
+		t.Fatalf("expected defaults to satisfy validation, got: %v", err)
+	}
+	if cfg.Server.APIPort != config.DefaultAPIPort {
+		t.Errorf("expected default api_port=%d, got %d", config.DefaultAPIPort, cfg.Server.APIPort)
+	}
+	if cfg.Server.BindAddress != config.DefaultBindAddress {
+		t.Errorf("expected default bind_address=%q, got %q", config.DefaultBindAddress, cfg.Server.BindAddress)
+	}
+	if cfg.Server.LogLevel != config.DefaultLogLevel {
+		t.Errorf("expected default log_level=%q, got %q", config.DefaultLogLevel, cfg.Server.LogLevel)
+	}
+	if cfg.Paths.DataDir != config.DefaultDataDir {
+		t.Errorf("expected default data_dir=%q, got %q", config.DefaultDataDir, cfg.Paths.DataDir)
+	}
+}
+
+func TestLoad_MissingFile_ReturnsError(t *testing.T) {
+	_, err := config.Load("/nonexistent/path/config.toml")
+	if err == nil {
+		t.Fatal("expected error for missing file, got nil")
+	}
+}
+
+func TestLoad_UnknownFields_AreRejected(t *testing.T) {
+	content := `
+[server]
+api_port      = 8080
+bind_address  = "127.0.0.1"
+log_level     = "info"
+mystery_field = "should fail"
+
+[auth]
+jwt_secret = "testsecret"
+`
+	path := writeTemp(t, content)
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("expected error for unknown fields, got nil")
+	}
+}
+
+func TestLoad_InvalidLogLevel_ReturnsValidationError(t *testing.T) {
+	content := `
+[server]
+log_level = "verbose"
+
+[auth]
+jwt_secret = "testsecret"
+`
+	path := writeTemp(t, content)
+
+	_, err := config.Load(path)
+	if !errors.Is(err, errors.ErrValidation) {
+		t.Errorf("expected ErrValidation, got: %v", err)
+	}
+}
+
+func TestLoad_EmptyJWTSecret_ReturnsValidationError(t *testing.T) {
+	content := `
+[auth]
+jwt_secret = ""
+`
+	path := writeTemp(t, content)
+
+	_, err := config.Load(path)
+	if !errors.Is(err, errors.ErrValidation) {
+		t.Errorf("expected ErrValidation for empty jwt_secret, got: %v", err)
+	}
+}
+
+func TestLoad_InvalidTOML_ReturnsError(t *testing.T) {
+	content := `this is not valid toml ===`
+	path := writeTemp(t, content)
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("expected error for invalid TOML, got nil")
+	}
+}

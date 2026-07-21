@@ -2,6 +2,7 @@ name: Security Scan
 
 on:
   schedule:
+    # Run every Monday at 00:00 UTC.
     - cron: '0 0 * * 1'
   push:
     branches:
@@ -14,39 +15,41 @@ permissions:
 jobs:
   security-scan:
     name: Security Vulnerability Scans
-    runs-on: ubuntu-22.04
+    # Self-hosted Debian runner — requires: Go, trivy, nancy.
+    # Install trivy: https://aquasecurity.github.io/trivy/latest/getting-started/installation/
+    # Install nancy: go install github.com/sonatype-nexus-community/nancy@latest
+    runs-on: [self-hosted, debian]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Go 1.22
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
+      - name: Verify toolchain
+        run: go version
 
       - name: Run govulncheck
-        uses: golang/govulncheck-action@v1
-        with:
-          go-version-input: 1.22
-          go-package: ./...
+        working-directory: ./core
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
 
       - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'HIGH,CRITICAL'
+        # trivy must be installed on the self-hosted runner.
+        run: |
+          trivy fs . \
+            --format sarif \
+            --output trivy-results.sarif \
+            --severity HIGH,CRITICAL \
+            --exit-code 0
 
       - name: Upload Trivy SARIF Report
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: trivy-results.sarif
           category: trivy-fs
 
-      - name: Run Nancy for Go Dependencies
+      - name: Run Nancy (Go dependency CVE check)
+        working-directory: ./core
         run: |
           go list -json -m all | nancy sleuth
         env:

@@ -12,24 +12,25 @@ permissions:
 jobs:
   release:
     name: Build & Release
-    runs-on: ubuntu-22.04
+    # Self-hosted Debian runner — requires: Go, Node, Docker, dpkg-deb.
+    runs-on: [self-hosted, debian]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Go 1.22
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
+      - name: Verify toolchain
+        run: |
+          go version
+          node --version
+          npm --version
+          docker --version
+          dpkg-deb --version
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './web/package-lock.json'
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
 
       - name: Install Frontend Dependencies
         working-directory: ./web
@@ -39,21 +40,28 @@ jobs:
         working-directory: ./web
         run: npm run build
 
-      - name: Embed Frontend Assets
-        run: |
-          mkdir -p internal/web/dist
-          cp -r web/dist/* internal/web/dist/
-
       - name: Build Go Binaries
+        working-directory: ./core
         run: |
-          GOOS=linux GOARCH=amd64 go build -o bin/hostanything-linux-amd64 ./cmd/hostanything
-          GOOS=linux GOARCH=arm64 go build -o bin/hostanything-linux-arm64 ./cmd/hostanything
+          mkdir -p ../bin
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+            go build -ldflags "-X main.version=${{ steps.version.outputs.VERSION }}" \
+            -o ../bin/hostanything-linux-amd64 ./cmd/hostanything
 
-      - name: Package as .deb
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 \
+            go build -ldflags "-X main.version=${{ steps.version.outputs.VERSION }}" \
+            -o ../bin/hostanything-linux-arm64 ./cmd/hostanything
+
+      - name: Package as .deb (amd64)
         run: |
           chmod +x scripts/package-deb.sh
-          ./scripts/package-deb.sh linux amd64 bin/hostanything-linux-amd64
-          ./scripts/package-deb.sh linux arm64 bin/hostanything-linux-arm64
+          VERSION=${{ steps.version.outputs.VERSION }} ARCH=amd64 \
+            bash scripts/package-deb.sh
+
+      - name: Package as .deb (arm64)
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }} ARCH=arm64 \
+            bash scripts/package-deb.sh
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -70,6 +78,8 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/hostanything:${{ github.ref_name }}
             ghcr.io/${{ github.repository_owner }}/hostanything:latest
+          build-args: |
+            VERSION=${{ steps.version.outputs.VERSION }}
 
       - name: Generate Changelog
         id: changelog
@@ -84,4 +94,5 @@ jobs:
           files: |
             bin/hostanything-linux-amd64
             bin/hostanything-linux-arm64
-            dist/*.deb
+            dist/hostanything_${{ steps.version.outputs.VERSION }}_amd64.deb
+            dist/hostanything_${{ steps.version.outputs.VERSION }}_arm64.deb

@@ -8,24 +8,23 @@ on:
 jobs:
   go-lint:
     name: Go Lint
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, debian]
+    defaults:
+      run:
+        working-directory: ./core
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Go 1.22
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
-          cache: false
+      - name: Verify Go installation
+        run: go version
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v4
-        with:
-          version: v1.59
-          args: --config=.golangci.yml
+        # golangci-lint must be installed on the self-hosted runner.
+        # Install: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin
+        run: golangci-lint run --config=.golangci.yml ./...
 
-      - name: Check goimports
+      - name: Check goimports formatting
         run: |
           go install golang.org/x/tools/cmd/goimports@latest
           diff=$(goimports -d -e .)
@@ -37,7 +36,7 @@ jobs:
 
   web-lint:
     name: Web Lint
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, debian]
     defaults:
       run:
         working-directory: ./web
@@ -45,12 +44,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './web/package-lock.json'
+      - name: Verify Node installation
+        run: node --version && npm --version
 
       - name: Install dependencies
         run: npm ci
@@ -63,12 +58,11 @@ jobs:
 
   markdown-lint:
     name: Markdown Lint
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, debian]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Run markdownlint
-        uses: DavidAnson/markdownlint-cli2-action@v15
-        with:
-          globs: "**/*.md"
+        # markdownlint-cli2 must be installed: npm install -g markdownlint-cli2
+        run: markdownlint-cli2 "**/*.md" "#node_modules"

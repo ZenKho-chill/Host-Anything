@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package api contains the HTTP handler functions for the hostanything REST API.
-// Handlers are pure functions that accept dependencies as parameters and return
-// [http.HandlerFunc] values. No business logic lives here — all logic is
-// delegated to internal service packages.
+// Package server wires together the HTTP router, middleware stack, and API handlers
+// into a runnable [net/http.Server].
 //
-// All endpoints are defined in SPEC-004. Route registration is handled by
-// [github.com/host-anything/hostanything/internal/server].
-package api
+// Responsibilities:
+//   - Server construction with timeouts ([NewServer])
+//   - Route registration ([RegisterRoutes])
+//   - Structured request logging middleware
+//
+// No business logic lives here. All handler logic is delegated to [internal/api].
+// Authentication middleware (M4) will be registered here per SPEC-030.
+package server
