@@ -22,7 +22,7 @@ import (
 // RegisterRoutes sets up all API endpoints on the given router.
 func RegisterRoutes(r chi.Router, opts Options) {
 	// Public Routes
-	r.Get("/api/v1/health", api.HealthHandler(opts.EnabledRuntimes))
+	r.Get("/api/v1/health", api.HealthHandler(opts.Version, opts.EnabledRuntimes))
 	r.Post("/api/v1/auth/login", api.AuthHandler(opts.Config, opts.Logger))
 
 	// Protected Routes

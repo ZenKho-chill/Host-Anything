@@ -31,6 +31,8 @@ func validBaseConfig() *types.SystemConfig {
 			LogLevel:    "info",
 		},
 		Auth: types.AuthConfig{
+			AdminUsername:  "admin",
+			AdminPassword:  "admin",
 			JWTSecret:      "supersecretkey",
 			SessionTimeout: "24h",
 		},
