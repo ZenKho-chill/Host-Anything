@@ -25,6 +25,8 @@ import (
 	"github.com/host-anything/hostanything/internal/logging"
 	"github.com/host-anything/hostanything/internal/server"
 	"github.com/host-anything/hostanything/internal/template"
+	"github.com/host-anything/hostanything/internal/crypto"
+	"github.com/host-anything/hostanything/internal/runtime"
 	"github.com/host-anything/hostanything/pkg/types"
 )
 
@@ -57,12 +59,22 @@ func buildApp(configPath, version string) (*app, error) {
 		return nil, fmt.Errorf("buildApp: init template registry: %w", err)
 	}
 
+	masterKey, err := crypto.LoadOrCreateKey(cfg.Paths.DataDir)
+	if err != nil {
+		return nil, fmt.Errorf("buildApp: load master key: %w", err)
+	}
+
+	mgr := runtime.NewServiceManager(logger)
+	// (Adapters would be registered here, e.g. docker.NewAdapter())
+
 	srv, err := server.NewServer(server.Options{
 		Config:          cfg,
 		Logger:          logger,
 		Version:         version,
 		EnabledRuntimes: enabledRuntimes,
 		Registry:        reg,
+		Manager:         mgr,
+		MasterKey:       masterKey,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("buildApp: create server: %w", err)

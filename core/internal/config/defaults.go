@@ -34,6 +34,13 @@ func ApplyDefaults(cfg *types.SystemConfig) {
 	if cfg.Auth.SessionTimeout == "" {
 		cfg.Auth.SessionTimeout = DefaultSessionTimeout
 	}
+	if cfg.Auth.AdminUsername == "" {
+		cfg.Auth.AdminUsername = "admin"
+	}
+	if cfg.Auth.AdminPassword == "" {
+		cfg.Auth.AdminPassword = "admin" // In a real app, this should force a change on first boot
+	}
+
 	if cfg.Paths.DataDir == "" {
 		cfg.Paths.DataDir = DefaultDataDir
 	}

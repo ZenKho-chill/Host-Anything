@@ -53,6 +53,12 @@ func Validate(cfg *types.SystemConfig) error {
 	if cfg.Auth.JWTSecret == "" {
 		return fmt.Errorf("config.Validate: auth.jwt_secret must not be empty: %w", errors.ErrValidation)
 	}
+	if cfg.Auth.AdminUsername == "" {
+		return fmt.Errorf("config.Validate: auth.admin_username must not be empty: %w", errors.ErrValidation)
+	}
+	if cfg.Auth.AdminPassword == "" {
+		return fmt.Errorf("config.Validate: auth.admin_password must not be empty: %w", errors.ErrValidation)
+	}
 	if cfg.Paths.DataDir == "" {
 		return fmt.Errorf("config.Validate: paths.data_dir must not be empty: %w", errors.ErrValidation)
 	}

@@ -53,6 +53,12 @@ type Options struct {
 
 	// Registry is the template registry for managing service templates.
 	Registry *template.Registry
+
+	// Manager handles the deployment lifecycle.
+	Manager *runtime.ServiceManager
+
+	// MasterKey is the encryption key for secret config vars.
+	MasterKey []byte
 }
 
 // NewServer constructs a fully configured [net/http.Server] with all routes
@@ -69,6 +75,12 @@ func NewServer(opts Options) (*http.Server, error) {
 	}
 	if opts.Registry == nil {
 		return nil, fmt.Errorf("server.NewServer: opts.Registry must not be nil")
+	}
+	if opts.Manager == nil {
+		return nil, fmt.Errorf("server.NewServer: opts.Manager must not be nil")
+	}
+	if len(opts.MasterKey) == 0 {
+		return nil, fmt.Errorf("server.NewServer: opts.MasterKey must not be empty")
 	}
 
 	r := chi.NewRouter()
