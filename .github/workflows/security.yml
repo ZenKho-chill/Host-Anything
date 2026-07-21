@@ -15,10 +15,7 @@ permissions:
 jobs:
   security-scan:
     name: Security Vulnerability Scans
-    # Self-hosted Debian runner — requires: Go, trivy, nancy.
-    # Install trivy: https://aquasecurity.github.io/trivy/latest/getting-started/installation/
-    # Install nancy: go install github.com/sonatype-nexus-community/nancy@latest
-    runs-on: [self-hosted, debian]
+    runs-on: [self-hosted]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4

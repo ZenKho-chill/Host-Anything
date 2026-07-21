@@ -13,7 +13,7 @@ jobs:
   release:
     name: Build & Release
     # Self-hosted Debian runner — requires: Go, Node, Docker, dpkg-deb.
-    runs-on: [self-hosted, debian]
+    runs-on: [self-hosted]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
