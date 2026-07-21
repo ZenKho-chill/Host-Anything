@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { LogOut, Plus, Activity, Server, Box } from 'lucide-react';
+import { LogOut, Plus, Activity, Server, Box, ShoppingBag } from 'lucide-react';
 
 interface Service {
   id: string;
@@ -46,6 +46,9 @@ export const DashboardView: React.FC = () => {
           <p className="text-[var(--text-muted)] mt-2">Manage your active deployments</p>
         </div>
         <div className="flex gap-4">
+          <Button variant="secondary" onClick={() => navigate('/marketplace')}>
+            <ShoppingBag size={18} /> Marketplace
+          </Button>
           <Button onClick={() => navigate('/templates')}>
             <Plus size={18} /> Deploy Service
           </Button>

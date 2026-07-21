@@ -1,0 +1,66 @@
+[meta]
+name        = "nginx"
+version     = "1.0.0"
+description = "Nginx is a high-performance HTTP server and reverse proxy, also used as a load balancer and mail proxy."
+author      = "host-anything"
+license     = "MIT"
+tags        = ["webserver", "proxy", "http", "loadbalancer"]
+homepage    = "https://nginx.org"
+
+[requirements]
+min_memory = "32MB"
+min_cpu    = 0.1
+ports      = [80, 443]
+
+[[config]]
+name        = "NGINX_WORKER_PROCESSES"
+type        = "string"
+default     = "auto"
+required    = false
+description = "Number of worker processes (use 'auto' to match CPU core count)."
+
+[[config]]
+name        = "NGINX_WORKER_CONNECTIONS"
+type        = "int"
+default     = 1024
+required    = false
+description = "Maximum number of simultaneous connections per worker."
+
+[runtime]
+preferred = "docker"
+supported = ["docker", "podman"]
+image     = "nginx:1.27-alpine"
+
+[[volumes]]
+name        = "config"
+mount_path  = "/etc/nginx/conf.d"
+description = "Nginx virtual host configuration files (.conf)."
+
+[[volumes]]
+name        = "html"
+mount_path  = "/usr/share/nginx/html"
+description = "Root directory for static HTML files to serve."
+
+[[volumes]]
+name        = "logs"
+mount_path  = "/var/log/nginx"
+description = "Access and error log files."
+
+[[network]]
+internal_port = 80
+external_port = 80
+protocol      = "http"
+
+[[network]]
+internal_port = 443
+external_port = 443
+protocol      = "tcp"
+
+[healthcheck]
+command  = "curl -f http://localhost/ || exit 1"
+interval = "30s"
+timeout  = "5s"
+retries  = 3
+
+[update]
+strategy = "rolling"

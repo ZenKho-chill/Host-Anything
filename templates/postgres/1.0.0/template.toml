@@ -1,0 +1,64 @@
+[meta]
+name        = "postgres"
+version     = "1.0.0"
+description = "PostgreSQL is a powerful, open-source object-relational database system with over 35 years of active development."
+author      = "host-anything"
+license     = "MIT"
+tags        = ["database", "sql", "relational"]
+homepage    = "https://www.postgresql.org"
+
+[requirements]
+min_memory = "256MB"
+min_cpu    = 0.5
+ports      = [5432]
+
+[[config]]
+name        = "POSTGRES_USER"
+type        = "string"
+default     = "postgres"
+required    = false
+description = "Superuser username for the database."
+
+[[config]]
+name        = "POSTGRES_PASSWORD"
+type        = "secret"
+required    = true
+description = "Superuser password — must not be empty."
+
+[[config]]
+name        = "POSTGRES_DB"
+type        = "string"
+default     = "postgres"
+required    = false
+description = "Name of the default database to create."
+
+[[config]]
+name        = "POSTGRES_MAX_CONNECTIONS"
+type        = "int"
+default     = 100
+required    = false
+description = "Maximum number of concurrent client connections."
+
+[runtime]
+preferred = "docker"
+supported = ["docker", "podman"]
+image     = "postgres:16-alpine"
+
+[[volumes]]
+name        = "data"
+mount_path  = "/var/lib/postgresql/data"
+description = "Persistent data directory for PostgreSQL table files and WAL."
+
+[[network]]
+internal_port = 5432
+external_port = 5432
+protocol      = "tcp"
+
+[healthcheck]
+command  = "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+interval = "30s"
+timeout  = "10s"
+retries  = 5
+
+[update]
+strategy = "recreate"

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { LoginView } from './views/LoginView';
 import { DashboardView } from './views/DashboardView';
 import { TemplateBrowserView } from './views/TemplateBrowserView';
+import { MarketplaceView } from './views/MarketplaceView';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -28,6 +29,12 @@ function App() {
         <Route path="/templates" element={
           <PrivateRoute>
             <TemplateBrowserView />
+          </PrivateRoute>
+        } />
+
+        <Route path="/marketplace" element={
+          <PrivateRoute>
+            <MarketplaceView />
           </PrivateRoute>
         } />
         

@@ -1,0 +1,59 @@
+[meta]
+name        = "redis"
+version     = "1.0.0"
+description = "Redis is an in-memory data structure store, used as a database, cache, and message broker."
+author      = "host-anything"
+license     = "MIT"
+tags        = ["database", "cache", "nosql"]
+homepage    = "https://redis.io"
+
+[requirements]
+min_memory = "64MB"
+min_cpu    = 0.1
+ports      = [6379]
+
+[[config]]
+name        = "REDIS_PASSWORD"
+type        = "secret"
+required    = false
+description = "Password to protect the Redis instance. Leave empty for no authentication."
+
+[[config]]
+name        = "REDIS_MAXMEMORY"
+type        = "string"
+default     = "256mb"
+required    = false
+description = "Maximum amount of memory Redis will use (e.g. 256mb, 1gb)."
+
+[[config]]
+name        = "REDIS_MAXMEMORY_POLICY"
+type        = "enum"
+default     = "allkeys-lru"
+required    = false
+options     = ["noeviction", "allkeys-lru", "volatile-lru", "allkeys-random", "volatile-random", "volatile-ttl"]
+description = "Eviction policy when the maxmemory limit is reached."
+
+[runtime]
+preferred = "docker"
+supported = ["docker", "podman"]
+image     = "redis:7-alpine"
+command   = ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--maxmemory", "${REDIS_MAXMEMORY}", "--maxmemory-policy", "${REDIS_MAXMEMORY_POLICY}"]
+
+[[volumes]]
+name        = "data"
+mount_path  = "/data"
+description = "Persistent storage for Redis AOF and RDB snapshots."
+
+[[network]]
+internal_port = 6379
+external_port = 6379
+protocol      = "tcp"
+
+[healthcheck]
+command  = "redis-cli ping | grep -q PONG"
+interval = "30s"
+timeout  = "5s"
+retries  = 3
+
+[update]
+strategy = "recreate"

@@ -1,13 +1,14 @@
 import React from 'react';
 
-export const Card: React.FC<{ children: React.ReactNode; className?: string; glass?: boolean; style?: React.CSSProperties }> = ({ 
+export const Card: React.FC<{ children: React.ReactNode; className?: string; glass?: boolean; style?: React.CSSProperties; onClick?: () => void }> = ({ 
   children, 
   className = '',
   glass = false,
-  style
+  style,
+  onClick,
 }) => {
   return (
-    <div className={`card ${glass ? 'glass-panel' : ''} ${className}`} style={style}>
+    <div className={`card ${glass ? 'glass-panel' : ''} ${className}`} style={style} onClick={onClick}>
       {children}
     </div>
   );

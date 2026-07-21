@@ -33,3 +33,13 @@ func writeJSON(w http.ResponseWriter, status int, v interface{}) {
 func writeJSONError(w http.ResponseWriter, status int, message string) {
 	writeJSON(w, status, map[string]string{"error": message})
 }
+
+// WriteJSON is the exported alias for writeJSON, used by handlers in this package.
+func WriteJSON(w http.ResponseWriter, status int, v interface{}) {
+	writeJSON(w, status, v)
+}
+
+// WriteError is the exported alias for writeJSONError, used by handlers in this package.
+func WriteError(w http.ResponseWriter, status int, message string) {
+	writeJSONError(w, status, message)
+}

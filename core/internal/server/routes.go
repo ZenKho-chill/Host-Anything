@@ -47,6 +47,12 @@ func RegisterRoutes(r chi.Router, opts Options) {
 		r.Get("/api/v1/services", svcHandler.ListServices)
 		r.Post("/api/v1/services", svcHandler.DeployService)
 		r.Get("/api/v1/services/{id}/logs", svcHandler.LogsService)
+
+		// Marketplace
+		mktHandler := api.NewMarketplaceHandler(opts.Config.Paths.TemplateDir, opts.Logger)
+		r.Get("/api/v1/marketplace/search", mktHandler.SearchTemplates)
+		r.Get("/api/v1/marketplace/preview/{owner}/{repo}", mktHandler.PreviewTemplate)
+		r.Post("/api/v1/marketplace/install", mktHandler.InstallTemplate)
 	})
 
 	// Serve static frontend files from web/dist (if present)
