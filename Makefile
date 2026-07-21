@@ -17,7 +17,7 @@ help: ## Show this help
 ## Build Targets
 build: ## Build the Go backend binary
 	@echo "Building Go backend..."
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $(BIN_DIR)/$(BIN_NAME) ./cmd/$(BIN_NAME)
+	cd core && CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o ../$(BIN_DIR)/$(BIN_NAME) ./cmd/$(BIN_NAME)
 
 build-web: ## Build the frontend
 	@echo "Building frontend..."
@@ -26,7 +26,7 @@ build-web: ## Build the frontend
 ## Development Targets
 dev: ## Run the Go backend dev server
 	@echo "Starting Go dev server..."
-	go run ./cmd/$(BIN_NAME)
+	cd core && go run ./cmd/$(BIN_NAME)
 
 dev-web: ## Run the frontend dev server
 	@echo "Starting frontend dev server..."
@@ -35,18 +35,18 @@ dev-web: ## Run the frontend dev server
 ## Testing Targets
 test: ## Run Go tests
 	@echo "Running tests..."
-	go test -v ./...
+	cd core && go test -v ./...
 
 test-coverage: ## Run Go tests with coverage report
 	@echo "Running tests with coverage..."
-	go test -coverprofile=coverage.txt -covermode=atomic ./...
+	cd core && go test -coverprofile=../coverage.txt -covermode=atomic ./...
 	go tool cover -html=coverage.txt -o coverage.html
 	@echo "Coverage report generated at coverage.html"
 
 ## Linting & Formatting
 lint: ## Run golangci-lint
 	@echo "Linting Go code..."
-	golangci-lint run ./...
+	cd core && golangci-lint run ./...
 
 lint-web: ## Run frontend linters
 	@echo "Linting frontend code..."
@@ -54,9 +54,9 @@ lint-web: ## Run frontend linters
 
 fmt: ## Format Go code
 	@echo "Formatting Go code..."
-	go fmt ./...
+	cd core && go fmt ./...
 	@if command -v goimports >/dev/null; then \
-		goimports -w .; \
+		cd core && goimports -w .; \
 	else \
 		echo "goimports not installed, skipping..."; \
 	fi
@@ -76,7 +76,7 @@ package-deb: build ## Build .deb package
 ## Security Targets
 security-scan: ## Run security scans
 	@echo "Running govulncheck..."
-	govulncheck ./...
+	cd core && govulncheck ./...
 	@echo "Running trivy scan..."
 	trivy fs .
 

@@ -40,25 +40,10 @@ Host Anything employs an adapter pattern to communicate with different runtimes 
    cd Host-Anything
    ```
 
-2. **Build the Core Backend:**
+3. **Run the setup script:**
+   This script will automatically build the backend, the web UI, and start the daemon.
    ```bash
-   cd core
-   go mod tidy
-   go build -o ../bin/hostanything ./cmd/hostanything
-   ```
-
-3. **Build the Web UI:**
-   ```bash
-   cd ../web
-   npm install
-   npm run build
-   ```
-
-4. **Start the Host Anything Daemon:**
-   Run the generated binary. By default, it will listen on port `8080`.
-   ```bash
-   cd ..
-   ./bin/hostanything
+   bash install.sh
    ```
 
 5. **Access the Dashboard:**
