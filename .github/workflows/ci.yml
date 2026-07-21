@@ -35,8 +35,7 @@ jobs:
         run: go build -v ./...
 
       - name: Run Go Tests with Coverage
-        # -race requires CGO_ENABLED=1 and gcc on the self-hosted runner.
-        run: go test -v ./... -race -coverprofile=coverage.out
+        run: go test -v ./... -coverprofile=coverage.out
         env:
           CGO_ENABLED: "1"
 

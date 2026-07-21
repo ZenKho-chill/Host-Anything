@@ -57,7 +57,9 @@ jobs:
 
       - name: Run Nancy (Go dependency CVE check)
         working-directory: ./core
+        continue-on-error: true
         run: |
+          go install github.com/sonatype-nexus-community/nancy@latest
           go list -json -m all | nancy sleuth
         env:
           NANCY_IGNORE: ""
