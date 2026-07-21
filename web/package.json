@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint src/",
+    "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
     "test": "vitest"
   },
   "dependencies": {
@@ -17,8 +17,11 @@
   "devDependencies": {
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
     "@vitejs/plugin-react": "^4",
     "eslint": "^8",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "typescript": "^5",
     "vite": "^5",
     "vitest": "^1"
