@@ -27,6 +27,10 @@ import (
 	"github.com/host-anything/hostanything/internal/template"
 	"github.com/host-anything/hostanything/internal/crypto"
 	"github.com/host-anything/hostanything/internal/runtime"
+	"github.com/host-anything/hostanything/internal/runtime/docker"
+	"github.com/host-anything/hostanything/internal/runtime/host"
+	"github.com/host-anything/hostanything/internal/runtime/kubernetes"
+	"github.com/host-anything/hostanything/internal/runtime/podman"
 	"github.com/host-anything/hostanything/pkg/types"
 )
 
@@ -52,8 +56,6 @@ func buildApp(configPath, version string) (*app, error) {
 		return nil, fmt.Errorf("buildApp: init logger: %w", err)
 	}
 
-	enabledRuntimes := collectEnabledRuntimes(cfg)
-
 	reg, err := template.NewRegistry(cfg.Paths.TemplateDir)
 	if err != nil {
 		return nil, fmt.Errorf("buildApp: init template registry: %w", err)
@@ -65,7 +67,40 @@ func buildApp(configPath, version string) (*app, error) {
 	}
 
 	mgr := runtime.NewServiceManager(logger)
-	// (Adapters would be registered here, e.g. docker.NewAdapter())
+	
+	var enabledRuntimes []string
+	if cfg.Runtimes.DockerEnabled {
+		if dAdapter, err := docker.NewAdapter(); err == nil {
+			mgr.RegisterAdapter("docker", dAdapter)
+			enabledRuntimes = append(enabledRuntimes, "docker")
+		} else {
+			logger.Warn("docker runtime disabled (auto-detect failed)", "error", err)
+		}
+	}
+	if cfg.Runtimes.PodmanEnabled {
+		if pAdapter, err := podman.NewAdapter(); err == nil {
+			mgr.RegisterAdapter("podman", pAdapter)
+			enabledRuntimes = append(enabledRuntimes, "podman")
+		} else {
+			logger.Warn("podman runtime disabled (auto-detect failed)", "error", err)
+		}
+	}
+	if cfg.Runtimes.K8sEnabled {
+		if kAdapter, err := kubernetes.NewAdapter(); err == nil {
+			mgr.RegisterAdapter("k8s", kAdapter)
+			enabledRuntimes = append(enabledRuntimes, "k8s")
+		} else {
+			logger.Warn("kubernetes runtime disabled (auto-detect failed)", "error", err)
+		}
+	}
+	if cfg.Runtimes.HostEnabled {
+		if hAdapter, err := host.NewAdapter(); err == nil {
+			mgr.RegisterAdapter("host", hAdapter)
+			enabledRuntimes = append(enabledRuntimes, "host")
+		} else {
+			logger.Warn("host runtime disabled (auto-detect failed)", "error", err)
+		}
+	}
 
 	srv, err := server.NewServer(server.Options{
 		Config:          cfg,
@@ -87,24 +122,7 @@ func buildApp(configPath, version string) (*app, error) {
 	}, nil
 }
 
-// collectEnabledRuntimes returns the ordered list of runtime adapter names
-// that are enabled in the system configuration.
-func collectEnabledRuntimes(cfg *types.SystemConfig) []string {
-	var runtimes []string
-	if cfg.Runtimes.DockerEnabled {
-		runtimes = append(runtimes, "docker")
-	}
-	if cfg.Runtimes.PodmanEnabled {
-		runtimes = append(runtimes, "podman")
-	}
-	if cfg.Runtimes.K8sEnabled {
-		runtimes = append(runtimes, "k8s")
-	}
-	if cfg.Runtimes.HostEnabled {
-		runtimes = append(runtimes, "host")
-	}
-	return runtimes
-}
+// collectEnabledRuntimes is no longer used, as we auto-detect during initialization.
 
 // run starts the HTTP server and blocks until ctx is cancelled.
 // On cancellation, it performs a graceful shutdown with a 15-second timeout.
@@ -116,7 +134,6 @@ func (a *app) run(ctx context.Context) error {
 	go func() {
 		a.logger.Info("hostanything started",
 			"address", a.srv.Addr,
-			"runtimes", collectEnabledRuntimes(a.cfg),
 		)
 		if err := a.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			listenErr <- fmt.Errorf("app.run: listen: %w", err)
