@@ -1,0 +1,56 @@
+# Host Anything — Git line ending normalization
+# Ensure consistent LF line endings in the repository regardless of OS
+
+# Default: normalize all text files to LF
+* text=auto eol=lf
+
+# Go source files
+*.go text eol=lf
+
+# TypeScript / JavaScript
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+
+# Web assets
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.json text eol=lf
+
+# Config files
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.env text eol=lf
+*.editorconfig text eol=lf
+*.gitattributes text eol=lf
+*.gitignore text eol=lf
+
+# Shell scripts — must be LF for execution on Linux/Debian
+*.sh text eol=lf
+Makefile text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+LICENSE text eol=lf
+CHANGELOG text eol=lf
+
+# Binary files — do not modify
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.deb binary
+*.tar.gz binary
+*.zip binary
