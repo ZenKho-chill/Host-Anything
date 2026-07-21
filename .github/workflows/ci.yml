@@ -11,7 +11,7 @@ on:
 jobs:
   go-ci:
     name: Go Tests & Build
-    runs-on: [self-hosted, debian]
+    runs-on: [self-hosted, Linux, X64]
     defaults:
       run:
         working-directory: ./core
@@ -52,7 +52,7 @@ jobs:
 
   web-ci:
     name: Web Tests & Build
-    runs-on: [self-hosted, debian]
+    runs-on: [self-hosted, Linux, X64]
     defaults:
       run:
         working-directory: ./web

@@ -15,7 +15,7 @@ permissions:
 jobs:
   security-scan:
     name: Security Vulnerability Scans
-    runs-on: [self-hosted, debian]
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
