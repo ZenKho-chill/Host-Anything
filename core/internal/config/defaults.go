@@ -14,7 +14,12 @@
 
 package config
 
-import "github.com/host-anything/hostanything/pkg/types"
+import (
+	"crypto/rand"
+	"encoding/hex"
+
+	"github.com/host-anything/hostanything/pkg/types"
+)
 
 // ApplyDefaults fills in zero-value fields in cfg with sensible defaults.
 // It must be called before [Validate] so that optional fields are populated
@@ -39,6 +44,11 @@ func ApplyDefaults(cfg *types.SystemConfig) {
 	}
 	if cfg.Auth.AdminPassword == "" {
 		cfg.Auth.AdminPassword = "admin" // In a real app, this should force a change on first boot
+	}
+	if cfg.Auth.JWTSecret == "" {
+		b := make([]byte, 32)
+		_, _ = rand.Read(b)
+		cfg.Auth.JWTSecret = hex.EncodeToString(b)
 	}
 
 	if cfg.Paths.DataDir == "" {
