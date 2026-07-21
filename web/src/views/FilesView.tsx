@@ -66,7 +66,7 @@ export const FilesView: React.FC = () => {
         <div className="flex items-center gap-4 mb-4 pb-4 border-b border-[var(--border)]">
           <Button variant="secondary" onClick={() => setPath('/')} disabled={path === '/'}><Home size={18} /></Button>
           <Button variant="secondary" onClick={goUp} disabled={path === '/'}><ArrowLeft size={18} /> Up</Button>
-          <div className="font-mono bg-[var(--surface-elevated)] px-4 py-2 rounded flex-1">
+          <div className="font-mono bg-[var(--bg-elevated)] px-4 py-2 rounded flex-1">
             {path}
           </div>
         </div>
@@ -79,7 +79,7 @@ export const FilesView: React.FC = () => {
               <div 
                 key={f.name} 
                 onClick={() => handleOpen(f)}
-                className="flex items-center justify-between p-3 rounded hover:bg-[var(--surface-elevated)] cursor-pointer transition-colors"
+                className="flex items-center justify-between p-3 rounded hover:bg-[var(--bg-elevated)] cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-3">
                   {f.is_dir ? <Folder className="text-yellow-400" /> : <File className="text-[var(--text-muted)]" />}

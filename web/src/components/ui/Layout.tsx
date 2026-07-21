@@ -21,11 +21,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Sidebar */}
       <div style={{ 
         width: '260px', 
-        background: 'var(--surface)', 
+        background: 'var(--bg-secondary)', 
         borderRight: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column'
@@ -56,7 +56,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   padding: '12px 16px',
                   marginBottom: '4px',
                   borderRadius: '8px',
-                  background: active ? 'var(--surface-elevated)' : 'transparent',
+                  background: active ? 'var(--bg-elevated)' : 'transparent',
                   color: active ? 'var(--text-primary)' : 'var(--text-muted)',
                   border: 'none',
                   cursor: 'pointer',

@@ -45,14 +45,48 @@ export const SettingsView: React.FC = () => {
             onChange={e => setTimezone(e.target.value)}
             style={{ 
               width: '100%', padding: '10px', 
-              background: 'var(--surface-elevated)', border: '1px solid var(--border)',
+              background: 'var(--bg-elevated)', border: '1px solid var(--border)',
               borderRadius: '8px', color: 'var(--text-primary)'
             }}
           >
-            <option value="UTC">UTC</option>
-            <option value="America/New_York">America/New_York</option>
-            <option value="Europe/London">Europe/London</option>
-            <option value="Asia/Ho_Chi_Minh">Asia/Ho_Chi_Minh</option>
+            <optgroup label="UTC Offsets">
+              <option value="UTC-12">UTC-12</option>
+              <option value="UTC-11">UTC-11</option>
+              <option value="UTC-10">UTC-10</option>
+              <option value="UTC-09">UTC-09</option>
+              <option value="UTC-08">UTC-08</option>
+              <option value="UTC-07">UTC-07</option>
+              <option value="UTC-06">UTC-06</option>
+              <option value="UTC-05">UTC-05</option>
+              <option value="UTC-04">UTC-04</option>
+              <option value="UTC-03">UTC-03</option>
+              <option value="UTC-02">UTC-02</option>
+              <option value="UTC-01">UTC-01</option>
+              <option value="UTC">UTC (00)</option>
+              <option value="UTC+01">UTC+01</option>
+              <option value="UTC+02">UTC+02</option>
+              <option value="UTC+03">UTC+03</option>
+              <option value="UTC+04">UTC+04</option>
+              <option value="UTC+05">UTC+05</option>
+              <option value="UTC+06">UTC+06</option>
+              <option value="UTC+07">UTC+07 (Vietnam, Indochina)</option>
+              <option value="UTC+08">UTC+08 (China, Singapore)</option>
+              <option value="UTC+09">UTC+09 (Japan, Korea)</option>
+              <option value="UTC+10">UTC+10</option>
+              <option value="UTC+11">UTC+11</option>
+              <option value="UTC+12">UTC+12</option>
+              <option value="UTC+13">UTC+13</option>
+              <option value="UTC+14">UTC+14</option>
+            </optgroup>
+            <optgroup label="Common Cities">
+              <option value="America/Los_Angeles">America/Los Angeles</option>
+              <option value="America/New_York">America/New York</option>
+              <option value="Europe/London">Europe/London</option>
+              <option value="Europe/Paris">Europe/Paris</option>
+              <option value="Asia/Ho_Chi_Minh">Asia/Ho Chi Minh</option>
+              <option value="Asia/Tokyo">Asia/Tokyo</option>
+              <option value="Australia/Sydney">Australia/Sydney</option>
+            </optgroup>
           </select>
         </div>
         <Button onClick={saveSettings} disabled={saving}>

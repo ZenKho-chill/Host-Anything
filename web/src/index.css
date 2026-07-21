@@ -3,17 +3,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Color Palette (Dark Theme Base) */
-  --bg-primary: #0f1115;
-  --bg-secondary: #171920;
-  --bg-elevated: rgba(30, 33, 40, 0.7);
+  /* Color Palette (AMP CubeCoder Inspired) */
+  --bg-primary: #12141c;
+  --bg-secondary: #1e212b;
+  --bg-elevated: rgba(30, 33, 43, 0.9);
   
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
   --text-muted: #64748b;
   
-  --accent-primary: #3b82f6;
-  --accent-hover: #2563eb;
+  --accent-primary: #6366f1; /* Indigo/Purple tint common in modern panels */
+  --accent-hover: #4f46e5;
   --accent-light: rgba(59, 130, 246, 0.15);
   
   --success: #10b981;
@@ -76,12 +76,10 @@ a:hover {
 
 /* Glassmorphism Utilities */
 .glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
 }
 
 /* Micro Animations */
