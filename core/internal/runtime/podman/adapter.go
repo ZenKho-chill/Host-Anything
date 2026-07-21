@@ -127,7 +127,7 @@ func (a *Adapter) Status(ctx context.Context, serviceID string) (*types.ServiceS
 
 func (a *Adapter) Logs(ctx context.Context, serviceID string) (io.ReadCloser, error) {
 	cmd := exec.CommandContext(ctx, "podman", "logs", "-f", "ha-"+serviceID)
-	
+
 	pr, pw := io.Pipe()
 	cmd.Stdout = pw
 	cmd.Stderr = pw

@@ -23,6 +23,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/host-anything/hostanything/internal/runtime"
+	"github.com/host-anything/hostanything/internal/store"
 	"github.com/host-anything/hostanything/internal/template"
 	"github.com/host-anything/hostanything/pkg/types"
 )
@@ -60,6 +61,9 @@ type Options struct {
 
 	// MasterKey is the encryption key for secret config vars.
 	MasterKey []byte
+
+	// DB is the SQLite database store.
+	DB *store.DB
 }
 
 // NewServer constructs a fully configured [net/http.Server] with all routes
@@ -83,14 +87,17 @@ func NewServer(opts Options) (*http.Server, error) {
 	if len(opts.MasterKey) == 0 {
 		return nil, fmt.Errorf("server.NewServer: opts.MasterKey must not be empty")
 	}
+	if opts.DB == nil {
+		return nil, fmt.Errorf("server.NewServer: opts.DB must not be nil")
+	}
 
 	r := chi.NewRouter()
 
 	// Global middleware — order matters.
-	r.Use(middleware.RequestID)  // assign unique request ID
-	r.Use(middleware.RealIP)     // respect X-Forwarded-For behind reverse proxy
+	r.Use(middleware.RequestID)       // assign unique request ID
+	r.Use(middleware.RealIP)          // respect X-Forwarded-For behind reverse proxy
 	r.Use(requestLogger(opts.Logger)) // structured JSON request logging
-	r.Use(middleware.Recoverer)  // recover from panics, log, return 500
+	r.Use(middleware.Recoverer)       // recover from panics, log, return 500
 
 	RegisterRoutes(r, opts)
 

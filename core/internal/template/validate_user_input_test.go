@@ -51,7 +51,7 @@ func TestValidateUserInput(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "missing required without default",
+			name:  "missing required without default",
 			input: map[string]string{
 				// REQ_STR missing
 			},

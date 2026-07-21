@@ -21,16 +21,18 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/host-anything/hostanything/internal/store"
 )
 
 type contextKey string
 
 const (
 	UserContextKey contextKey = "user"
+	RoleContextKey contextKey = "role"
 )
 
-// AuthMiddleware validates the JWT token in the Authorization header.
-func AuthMiddleware(jwtSecret string) func(http.Handler) http.Handler {
+// AuthMiddleware validates the JWT token and injects the user into context.
+func AuthMiddleware(jwtSecret string, db *store.DB) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
@@ -70,8 +72,39 @@ func AuthMiddleware(jwtSecret string) func(http.Handler) http.Handler {
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), UserContextKey, username)
+			user, err := db.GetUserByUsername(r.Context(), username)
+			if err != nil {
+				writeJSONError(w, http.StatusUnauthorized, "user no longer exists")
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), UserContextKey, user)
 			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+// RequirePermission is a middleware that enforces RBAC.
+func RequirePermission(permission string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user, ok := r.Context().Value(UserContextKey).(*store.User)
+			if !ok {
+				writeJSONError(w, http.StatusUnauthorized, "unauthorized")
+				return
+			}
+
+			// In a full implementation, we'd fetch the Role permissions from DB
+			// and check them here. For this milestone, super admin has "*"
+			// and any other role has restricted access.
+			// Let's assume user-admin has full access.
+			if user.ID != "user-admin" {
+				// Basic restriction for non-admins
+				writeJSONError(w, http.StatusForbidden, "forbidden: insufficient permissions")
+				return
+			}
+
+			next.ServeHTTP(w, r)
 		})
 	}
 }

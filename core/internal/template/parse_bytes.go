@@ -44,5 +44,3 @@ func ParseBytes(data []byte) (*types.Template, error) {
 
 	return &t, nil
 }
-
-

@@ -27,11 +27,11 @@ import (
 func RegisterRoutes(r chi.Router, opts Options) {
 	// Public Routes
 	r.Get("/api/v1/health", api.HealthHandler(opts.Version, opts.EnabledRuntimes))
-	r.Post("/api/v1/auth/login", api.AuthHandler(opts.Config, opts.Logger))
+	r.Post("/api/v1/auth/login", api.AuthHandler(opts.DB, opts.Config, opts.Logger))
 
 	// Protected Routes
 	r.Group(func(r chi.Router) {
-		r.Use(api.AuthMiddleware(opts.Config.Auth.JWTSecret))
+		r.Use(api.AuthMiddleware(opts.Config.Auth.JWTSecret, opts.DB))
 
 		// Templates
 		r.Get("/api/v1/templates", api.TemplateListHandler(opts.Registry, opts.Logger))
@@ -53,6 +53,31 @@ func RegisterRoutes(r chi.Router, opts Options) {
 		r.Get("/api/v1/marketplace/search", mktHandler.SearchTemplates)
 		r.Get("/api/v1/marketplace/preview/{owner}/{repo}", mktHandler.PreviewTemplate)
 		r.Post("/api/v1/marketplace/install", mktHandler.InstallTemplate)
+
+		// Enterprise Core APIs
+		// Users
+		userHandler := api.NewUserHandler(opts.DB, opts.Logger)
+		r.Get("/api/v1/users", userHandler.ListUsers)
+		r.Post("/api/v1/users", userHandler.CreateUser)
+
+		// Roles
+		roleHandler := api.NewRoleHandler(opts.DB, opts.Logger)
+		r.Get("/api/v1/roles", roleHandler.ListRoles)
+
+		// Schedules
+		scheduleHandler := api.NewScheduleHandler(opts.DB, opts.Logger)
+		r.Get("/api/v1/schedules", scheduleHandler.ListSchedules)
+		r.Post("/api/v1/schedules", scheduleHandler.CreateSchedule)
+		r.Delete("/api/v1/schedules/{id}", scheduleHandler.DeleteSchedule)
+
+		// Settings
+		settingsHandler := api.NewSettingsHandler(opts.DB, opts.Logger)
+		r.Get("/api/v1/settings", settingsHandler.GetSettings)
+		r.Post("/api/v1/settings", settingsHandler.UpdateSettings)
+
+		// File Manager
+		fileHandler := api.NewFileHandler(opts.Config.Paths.DataDir, opts.Logger)
+		r.Get("/api/v1/files/*", fileHandler.ListFiles)
 	})
 
 	// Serve static frontend files from web/dist (if present)
@@ -76,7 +101,7 @@ func RegisterRoutes(r chi.Router, opts Options) {
 
 	if staticDir != "" {
 		fs := http.FileServer(http.Dir(staticDir))
-		
+
 		// Fallback route for SPA (React Router)
 		r.Get("/*", func(w http.ResponseWriter, req *http.Request) {
 			path := filepath.Join(staticDir, req.URL.Path)

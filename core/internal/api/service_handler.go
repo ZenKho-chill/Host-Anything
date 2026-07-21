@@ -51,18 +51,18 @@ type ServiceHandler struct {
 // ListServices handles GET /api/v1/services.
 func (h *ServiceHandler) ListServices(w http.ResponseWriter, r *http.Request) {
 	services := h.Manager.ListServices()
-	
+
 	// Convert map to a list for JSON
 	type Svc struct {
 		ID    string             `json:"id"`
 		State types.ServiceState `json:"state"`
 	}
-	
+
 	var list []Svc
 	for id, state := range services {
 		list = append(list, Svc{ID: id, State: state})
 	}
-	
+
 	writeJSON(w, http.StatusOK, list)
 }
 

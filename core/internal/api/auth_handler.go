@@ -21,6 +21,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/host-anything/hostanything/internal/crypto"
+	"github.com/host-anything/hostanything/internal/store"
 	"github.com/host-anything/hostanything/pkg/types"
 )
 
@@ -36,7 +38,7 @@ type LoginResponse struct {
 }
 
 // AuthHandler handles POST /api/v1/auth/login.
-func AuthHandler(cfg *types.SystemConfig, logger *slog.Logger) http.HandlerFunc {
+func AuthHandler(db *store.DB, cfg *types.SystemConfig, logger *slog.Logger) http.HandlerFunc {
 	// Parse timeout, fallback to 24h if invalid
 	timeout, err := time.ParseDuration(cfg.Auth.SessionTimeout)
 	if err != nil {
@@ -50,10 +52,9 @@ func AuthHandler(cfg *types.SystemConfig, logger *slog.Logger) http.HandlerFunc 
 			return
 		}
 
-		// Verify credentials
-		// Note: In a real system we'd use bcrypt.CompareHashAndPassword.
-		// For this milestone, we support plain text match if not hashed, or simulated.
-		if req.Username != cfg.Auth.AdminUsername || req.Password != cfg.Auth.AdminPassword {
+		// Verify credentials via DB
+		user, err := db.GetUserByUsername(r.Context(), req.Username)
+		if err != nil || !crypto.CheckPasswordHash(req.Password, user.PasswordHash) {
 			// Fail2ban compatible logging: must include client IP and failure keyword
 			if cfg.Auth.Fail2BanEnabled {
 				logger.Warn("authentication failed",

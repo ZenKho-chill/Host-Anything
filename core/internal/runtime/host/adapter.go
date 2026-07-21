@@ -102,18 +102,18 @@ func (a *Adapter) Remove(ctx context.Context, serviceID string) error {
 	unitName := "ha-" + serviceID
 
 	_ = a.Stop(ctx, serviceID)
-	
+
 	// Reset failed state to clear transient units
 	cmd := exec.CommandContext(ctx, "systemctl", "reset-failed", unitName)
 	_ = cmd.Run()
-	
+
 	return nil
 }
 
 func (a *Adapter) Status(ctx context.Context, serviceID string) (*types.ServiceStatus, error) {
 	cmd := exec.CommandContext(ctx, "systemctl", "is-active", "ha-"+serviceID)
 	out, _ := cmd.CombinedOutput()
-	
+
 	statusStr := strings.TrimSpace(string(out))
 	state := types.ServiceStateError
 
@@ -136,7 +136,7 @@ func (a *Adapter) Status(ctx context.Context, serviceID string) (*types.ServiceS
 
 func (a *Adapter) Logs(ctx context.Context, serviceID string) (io.ReadCloser, error) {
 	cmd := exec.CommandContext(ctx, "journalctl", "-u", "ha-"+serviceID, "-f", "--output=cat")
-	
+
 	pr, pw := io.Pipe()
 	cmd.Stdout = pw
 	cmd.Stderr = pw

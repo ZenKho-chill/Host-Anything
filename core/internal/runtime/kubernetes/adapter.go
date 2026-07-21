@@ -63,7 +63,7 @@ func NewAdapter() (*Adapter, error) {
 func (a *Adapter) Deploy(ctx context.Context, spec *types.ServiceSpec) error {
 	name := "ha-" + spec.ServiceID
 	labels := map[string]string{
-		"app": name,
+		"app":                     name,
 		"sh.hostanything.managed": "true",
 	}
 
@@ -98,7 +98,7 @@ func (a *Adapter) Deploy(ctx context.Context, spec *types.ServiceSpec) error {
 			TargetPort: intstr.FromInt(netCfg.InternalPort),
 			Protocol:   proto,
 		}
-		
+
 		if netCfg.ExternalPort > 0 {
 			svcPort.NodePort = int32(netCfg.ExternalPort)
 			hasExternalPort = true
@@ -191,7 +191,7 @@ func (a *Adapter) Deploy(ctx context.Context, spec *types.ServiceSpec) error {
 		servicesClient := a.clientset.CoreV1().Services(a.namespace)
 		_, err := servicesClient.Create(ctx, service, metav1.CreateOptions{})
 		if err != nil {
-			// Update if exists. Services need ResourceVersion to update, 
+			// Update if exists. Services need ResourceVersion to update,
 			// so typically we get it first, but for M5 we'll just ignore if it exists.
 		}
 	}
@@ -233,7 +233,7 @@ func (a *Adapter) Start(ctx context.Context, serviceID string) error {
 
 func (a *Adapter) Remove(ctx context.Context, serviceID string) error {
 	name := "ha-" + serviceID
-	
+
 	// Delete Service
 	_ = a.clientset.CoreV1().Services(a.namespace).Delete(ctx, name, metav1.DeleteOptions{})
 
@@ -248,7 +248,7 @@ func (a *Adapter) Remove(ctx context.Context, serviceID string) error {
 
 func (a *Adapter) Status(ctx context.Context, serviceID string) (*types.ServiceStatus, error) {
 	name := "ha-" + serviceID
-	
+
 	deploy, err := a.clientset.AppsV1().Deployments(a.namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("kubernetes: get deployment: %w", err)

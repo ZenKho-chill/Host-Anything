@@ -19,18 +19,20 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/host-anything/hostanything/internal/config"
-	"github.com/host-anything/hostanything/internal/logging"
-	"github.com/host-anything/hostanything/internal/server"
-	"github.com/host-anything/hostanything/internal/template"
 	"github.com/host-anything/hostanything/internal/crypto"
+	"github.com/host-anything/hostanything/internal/logging"
 	"github.com/host-anything/hostanything/internal/runtime"
 	"github.com/host-anything/hostanything/internal/runtime/docker"
 	"github.com/host-anything/hostanything/internal/runtime/host"
 	"github.com/host-anything/hostanything/internal/runtime/kubernetes"
 	"github.com/host-anything/hostanything/internal/runtime/podman"
+	"github.com/host-anything/hostanything/internal/server"
+	"github.com/host-anything/hostanything/internal/store"
+	"github.com/host-anything/hostanything/internal/template"
 	"github.com/host-anything/hostanything/pkg/types"
 )
 
@@ -66,8 +68,27 @@ func buildApp(configPath, version string) (*app, error) {
 		return nil, fmt.Errorf("buildApp: load master key: %w", err)
 	}
 
+	db, err := store.Open(cfg.Paths.DataDir, logger)
+	if err != nil {
+		return nil, fmt.Errorf("buildApp: open db: %w", err)
+	}
+
+	// Seed admin if environment variables are provided during installation
+	adminUser := os.Getenv("HA_ADMIN_USERNAME")
+	adminPass := os.Getenv("HA_ADMIN_PASSWORD")
+	if adminUser != "" && adminPass != "" {
+		hash, err := crypto.HashPassword(adminPass)
+		if err == nil {
+			if err := db.SeedAdmin(context.Background(), adminUser, hash); err != nil {
+				logger.Error("failed to seed admin user", "error", err)
+			} else {
+				logger.Info("admin user seeded successfully", "username", adminUser)
+			}
+		}
+	}
+
 	mgr := runtime.NewServiceManager(logger)
-	
+
 	var enabledRuntimes []string
 	if cfg.Runtimes.DockerEnabled {
 		if dAdapter, err := docker.NewAdapter(); err == nil {
@@ -110,6 +131,7 @@ func buildApp(configPath, version string) (*app, error) {
 		Registry:        reg,
 		Manager:         mgr,
 		MasterKey:       masterKey,
+		DB:              db,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("buildApp: create server: %w", err)
