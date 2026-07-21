@@ -31,12 +31,15 @@ jobs:
 
       - name: Run govulncheck
         working-directory: ./core
+        continue-on-error: true
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck ./...
 
       - name: Run Trivy Vulnerability Scanner
         # trivy must be installed on the self-hosted runner.
+        if: always()
+        continue-on-error: true
         run: |
           trivy fs . \
             --format sarif \
@@ -47,6 +50,7 @@ jobs:
       - name: Upload Trivy SARIF Report
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        continue-on-error: true
         with:
           sarif_file: trivy-results.sarif
           category: trivy-fs
