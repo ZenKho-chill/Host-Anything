@@ -3,15 +3,15 @@ name: CI Pipeline
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   go-ci:
     name: Go Tests & Build
-    runs-on: [self-hosted, debian]
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ./core
@@ -52,7 +52,7 @@ jobs:
 
   web-ci:
     name: Web Tests & Build
-    runs-on: [self-hosted, debian]
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ./web
