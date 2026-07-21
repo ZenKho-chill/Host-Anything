@@ -1,0 +1,25 @@
+{
+  "name": "@host-anything/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint src/",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "react": "^18",
+    "react-dom": "^18",
+    "react-router-dom": "^6"
+  },
+  "devDependencies": {
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@vitejs/plugin-react": "^4",
+    "eslint": "^8",
+    "typescript": "^5",
+    "vite": "^5",
+    "vitest": "^1"
+  }
+}

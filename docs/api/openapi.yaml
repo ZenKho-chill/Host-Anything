@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: Host Anything API
+  description: WIP API for managing Host Anything services and configurations.
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080/api/v1
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /auth/login:
+    post:
+      summary: Login user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: {type: string}
+                password: {type: string}
+      responses:
+        '200':
+          description: Successful login
+  /services:
+    get:
+      summary: List services
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: A list of services

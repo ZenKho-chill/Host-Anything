@@ -1,0 +1,78 @@
+name: Service Template Request
+description: Request a new service template for the marketplace
+title: "[TEMPLATE] "
+labels: ["template-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to request a new service template for the Host Anything marketplace.
+
+  - type: input
+    id: service-name
+    attributes:
+      label: Service Name
+      description: What is the name of the service? (e.g. Nextcloud, Ghost, Postgres)
+      placeholder: Nextcloud
+    validations:
+      required: true
+
+  - type: input
+    id: service-website
+    attributes:
+      label: Service Website
+      description: Official website or repository of the service.
+      placeholder: https://nextcloud.com/
+    validations:
+      required: true
+
+  - type: input
+    id: license
+    attributes:
+      label: License Type
+      description: What license is the service distributed under? (e.g. AGPL, MIT, Apache 2.0)
+      placeholder: AGPL
+    validations:
+      required: true
+
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Preferred Runtime
+      description: Which runtime is this template primarily intended for?
+      options:
+        - Docker
+        - Podman
+        - Kubernetes
+        - Host Mode
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Briefly describe what the service does and why it would be a valuable addition to the marketplace.
+    validations:
+      required: true
+
+  - type: input
+    id: docker-image
+    attributes:
+      label: Official Docker Image Link
+      description: Link to the official or most popular Docker image for this service (e.g. Docker Hub, GHCR).
+      placeholder: https://hub.docker.com/_/nextcloud
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Complexity Estimate
+      description: How complex is it to host this service?
+      options:
+        - Simple (Single container, minimal configuration)
+        - Moderate (Requires database, several environment variables)
+        - Complex (Multiple containers, proxy setup, volume permissions)
+    validations:
+      required: true

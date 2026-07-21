@@ -1,0 +1,13 @@
+# CODEOWNERS for Host Anything
+
+# Core Team owns everything by default
+*               @host-anything/core-team
+
+# Documentation is managed by the docs team
+docs/           @host-anything/docs-team
+
+# Templates are reviewed by the template reviewers
+templates/      @host-anything/template-reviewers
+
+# GitHub workflows and project configuration
+.github/        @host-anything/core-team

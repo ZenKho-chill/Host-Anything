@@ -1,0 +1,60 @@
+# This is the base template schema reference. Copy this file to start a new template.
+
+# [meta] contains metadata about the template.
+[meta]
+# name is the unique identifier for the template (string, required)
+name = "template-name"
+# version of the template (string, required)
+version = "1.0.0"
+# description of what the service does (string, optional)
+description = "A description of the service"
+# author of the template (string, optional)
+author = "Your Name"
+
+# [requirements] specify system constraints for the template.
+[requirements]
+# minimum_memory required in MB (integer, optional)
+minimum_memory = 512
+# minimum_storage required in MB (integer, optional)
+minimum_storage = 1024
+
+# [config] defines variables that users can configure.
+[config]
+# syntax: var_name = { type = "...", default = "...", description = "..." }
+# types can be "string", "int", "bool"
+example_port = { type = "int", default = 8080, description = "The port the service listens on" }
+
+# [runtime] defines how the service is executed.
+[runtime]
+# type of runtime environment: "docker", "podman", "host" (string, required)
+type = "docker"
+# image to use if type is docker/podman (string, required for container runtimes)
+image = "example/image:latest"
+
+# [volumes] map host directories to container directories.
+[volumes]
+# host_path = "container_path"
+# Use relative paths on the host, which will be resolved relative to the service's data directory.
+data = "/var/lib/data"
+
+# [network] defines exposed ports.
+[network]
+# host_port = container_port
+# Values can be templates like "${example_port}"
+"${example_port}" = 8080
+
+# [healthcheck] specifies how to verify the service is running.
+[healthcheck]
+# command to run inside the container (string, optional)
+command = "curl -f http://localhost:8080/health || exit 1"
+# interval in seconds (int, optional)
+interval = 30
+# timeout in seconds (int, optional)
+timeout = 10
+# retries before marking as unhealthy (int, optional)
+retries = 3
+
+# [update] defines the update strategy.
+[update]
+# strategy to use during updates: "recreate", "rolling" (string, default "recreate")
+strategy = "recreate"

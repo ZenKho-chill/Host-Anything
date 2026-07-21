@@ -1,0 +1,18 @@
+run:
+  timeout: 5m
+linters:
+  disable-all: true
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - gosimple
+    - ineffassign
+    - unused
+    - goimports
+    - misspell
+    - revive
+    - exhaustive
+    - godot
+    - wrapcheck
+  # funlen is disabled as we use 1 func per file where applicable

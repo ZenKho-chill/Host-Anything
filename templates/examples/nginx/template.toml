@@ -1,0 +1,40 @@
+[meta]
+name = "nginx"
+version = "1.0.0"
+description = "Nginx web server"
+author = "Host Anything Contributors"
+
+[requirements]
+minimum_memory = 64
+minimum_storage = 100
+
+[config]
+http_port = { type = "int", default = 80, description = "HTTP Port" }
+https_port = { type = "int", default = 443, description = "HTTPS Port" }
+worker_processes = { type = "int", default = 1, description = "Number of worker processes" }
+log_level = { type = "string", default = "warn", description = "Logging level" }
+
+[runtime]
+type = "docker"
+image = "nginx:stable-alpine"
+env = [
+  "NGINX_WORKER_PROCESSES=${worker_processes}",
+  "NGINX_LOG_LEVEL=${log_level}"
+]
+
+[volumes]
+www-data = "/usr/share/nginx/html"
+logs = "/var/log/nginx"
+
+[network]
+"${http_port}" = 80
+"${https_port}" = 443
+
+[healthcheck]
+command = "curl -f http://localhost/ || exit 1"
+interval = 30
+timeout = 5
+retries = 3
+
+[update]
+strategy = "recreate"
