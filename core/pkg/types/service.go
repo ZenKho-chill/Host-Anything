@@ -54,4 +54,11 @@ type ServiceStatus struct {
 
 	// Message provides additional context, especially useful in ERROR state.
 	Message string
+
+	// PortMappings maps the internal template port to the actual host port assigned.
+	// Key: internal port (e.g., 80). Value: host port (e.g., 8080).
+	PortMappings map[int]int
+
+	// RuntimeID is the underlying container or process ID.
+	RuntimeID string
 }
