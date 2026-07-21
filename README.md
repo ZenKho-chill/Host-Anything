@@ -36,8 +36,8 @@ Host Anything employs an adapter pattern to communicate with different runtimes 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/hostanything/hostanything.git
-   cd hostanything
+   git clone https://github.com/ZenKho-chill/Host-Anything.git
+   cd Host-Anything
    ```
 
 2. **Build the Core Backend:**

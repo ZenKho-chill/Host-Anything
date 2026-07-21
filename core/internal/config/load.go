@@ -32,19 +32,26 @@ import (
 func Load(path string) (*types.SystemConfig, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("config.Load: read file %q: %w", path, err)
+		if os.IsNotExist(err) {
+			// If file is missing, proceed with empty config to apply defaults
+			data = []byte{}
+		} else {
+			return nil, fmt.Errorf("config.Load: read file %q: %w", path, err)
+		}
 	}
 
 	var cfg types.SystemConfig
 
-	md, err := toml.Decode(string(data), &cfg)
-	if err != nil {
-		return nil, fmt.Errorf("config.Load: parse toml: %w", err)
-	}
+	if len(data) > 0 {
+		md, err := toml.Decode(string(data), &cfg)
+		if err != nil {
+			return nil, fmt.Errorf("config.Load: parse toml: %w", err)
+		}
 
-	// Reject unknown keys — configuration must be explicit and typo-free.
-	if undecoded := md.Undecoded(); len(undecoded) > 0 {
-		return nil, fmt.Errorf("config.Load: unknown fields in config file (check for typos): %v", undecoded)
+		// Reject unknown keys — configuration must be explicit and typo-free.
+		if undecoded := md.Undecoded(); len(undecoded) > 0 {
+			return nil, fmt.Errorf("config.Load: unknown fields in config file (check for typos): %v", undecoded)
+		}
 	}
 
 	ApplyDefaults(&cfg)
