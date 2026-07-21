@@ -19,19 +19,14 @@ import (
 	"github.com/host-anything/hostanything/internal/api"
 )
 
-// RegisterRoutes registers all API routes onto the provided chi router.
-// This function is kept separate from server construction to make the
-// routing table easy to read and extend without touching server setup logic.
-//
-// Route layout follows SPEC-004. Authentication middleware will be added
-// to protected route groups in M4 (SPEC-030).
+// RegisterRoutes sets up all HTTP endpoints for the application.
 func RegisterRoutes(r chi.Router, opts Options) {
 	r.Route("/api/v1", func(r chi.Router) {
-		// GET /api/v1/health — unauthenticated liveness probe (SPEC-004 §1).
 		r.Get("/health", api.HealthHandler(opts.Version, opts.EnabledRuntimes))
 
-		// TODO(M3): service lifecycle endpoints (SPEC-004 §2–7)
-		// TODO(M4): template + marketplace endpoints (SPEC-004 §8–10)
-		// TODO(M4): auth endpoints POST /auth/login (SPEC-030)
+		r.Route("/templates", func(r chi.Router) {
+			r.Get("/", api.TemplateListHandler(opts.Registry, opts.Logger))
+			r.Get("/{name}", api.TemplateGetHandler(opts.Registry, opts.Logger))
+		})
 	})
 }

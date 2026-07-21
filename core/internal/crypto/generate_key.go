@@ -12,11 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package template implements the Host Anything Template Engine.
-// It parses, validates, and manages service definitions defined in TOML
-// according to SPEC-001.
-//
-// A parsed template can be resolved against user-provided variables,
-// validating regex constraints, substituting variables into commands,
-// and optionally encrypting secret types before they are written to disk.
-package template
+package crypto
+
+import (
+	"crypto/rand"
+	"fmt"
+)
+
+// KeySize is the required AES-256 key length in bytes.
+const KeySize = 32
+
+// GenerateKey generates a cryptographically random 32-byte AES-256 key
+// using the operating system's CSPRNG.
+func GenerateKey() ([]byte, error) {
+	key := make([]byte, KeySize)
+	if _, err := rand.Read(key); err != nil {
+		return nil, fmt.Errorf("crypto.GenerateKey: read random bytes: %w", err)
+	}
+	return key, nil
+}

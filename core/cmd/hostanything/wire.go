@@ -24,6 +24,7 @@ import (
 	"github.com/host-anything/hostanything/internal/config"
 	"github.com/host-anything/hostanything/internal/logging"
 	"github.com/host-anything/hostanything/internal/server"
+	"github.com/host-anything/hostanything/internal/template"
 	"github.com/host-anything/hostanything/pkg/types"
 )
 
@@ -51,11 +52,17 @@ func buildApp(configPath, version string) (*app, error) {
 
 	enabledRuntimes := collectEnabledRuntimes(cfg)
 
+	reg, err := template.NewRegistry(cfg.Paths.TemplateDir)
+	if err != nil {
+		return nil, fmt.Errorf("buildApp: init template registry: %w", err)
+	}
+
 	srv, err := server.NewServer(server.Options{
 		Config:          cfg,
 		Logger:          logger,
 		Version:         version,
 		EnabledRuntimes: enabledRuntimes,
+		Registry:        reg,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("buildApp: create server: %w", err)

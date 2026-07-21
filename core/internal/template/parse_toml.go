@@ -12,11 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package template implements the Host Anything Template Engine.
-// It parses, validates, and manages service definitions defined in TOML
-// according to SPEC-001.
-//
-// A parsed template can be resolved against user-provided variables,
-// validating regex constraints, substituting variables into commands,
-// and optionally encrypting secret types before they are written to disk.
 package template
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/host-anything/hostanything/pkg/types"
+)
+
+// ParseTOML reads a template TOML file from disk and parses it.
+// See [ParseBytes] for details on validation.
+func ParseTOML(path string) (*types.Template, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("template.ParseTOML: read file %q: %w", path, err)
+	}
+	t, err := ParseBytes(data)
+	if err != nil {
+		return nil, fmt.Errorf("template.ParseTOML: file %q: %w", path, err)
+	}
+	return t, nil
+}

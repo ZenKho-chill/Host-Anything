@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/host-anything/hostanything/internal/template"
 	"github.com/host-anything/hostanything/pkg/types"
 )
 
@@ -49,6 +50,9 @@ type Options struct {
 	// EnabledRuntimes is the list of runtime adapter names currently active.
 	// Used to populate the /health response.
 	EnabledRuntimes []string
+
+	// Registry is the template registry for managing service templates.
+	Registry *template.Registry
 }
 
 // NewServer constructs a fully configured [net/http.Server] with all routes
@@ -62,6 +66,9 @@ func NewServer(opts Options) (*http.Server, error) {
 	}
 	if opts.Logger == nil {
 		return nil, fmt.Errorf("server.NewServer: opts.Logger must not be nil")
+	}
+	if opts.Registry == nil {
+		return nil, fmt.Errorf("server.NewServer: opts.Registry must not be nil")
 	}
 
 	r := chi.NewRouter()

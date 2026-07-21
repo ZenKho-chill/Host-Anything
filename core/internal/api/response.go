@@ -12,11 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package template implements the Host Anything Template Engine.
-// It parses, validates, and manages service definitions defined in TOML
-// according to SPEC-001.
-//
-// A parsed template can be resolved against user-provided variables,
-// validating regex constraints, substituting variables into commands,
-// and optionally encrypting secret types before they are written to disk.
-package template
+package api
+
+import (
+	"encoding/json"
+	"net/http"
+)
+
+// writeJSON encodes v as JSON and writes it to w with the given status code.
+func writeJSON(w http.ResponseWriter, status int, v interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		// Just log or ignore since we can't change the status code now.
+		return
+	}
+}
+
+// writeJSONError writes a structured JSON error response.
+func writeJSONError(w http.ResponseWriter, status int, message string) {
+	writeJSON(w, status, map[string]string{"error": message})
+}

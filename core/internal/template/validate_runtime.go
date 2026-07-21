@@ -12,11 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package template implements the Host Anything Template Engine.
-// It parses, validates, and manages service definitions defined in TOML
-// according to SPEC-001.
-//
-// A parsed template can be resolved against user-provided variables,
-// validating regex constraints, substituting variables into commands,
-// and optionally encrypting secret types before they are written to disk.
 package template
+
+import (
+	"fmt"
+
+	"github.com/host-anything/hostanything/pkg/types"
+)
+
+func validateRuntime(rt types.RuntimeConfig) error {
+	if len(rt.Supported) == 0 {
+		return fmt.Errorf("missing required field 'supported'")
+	}
+	if rt.Image == "" {
+		return fmt.Errorf("missing required field 'image'")
+	}
+
+	if rt.Preferred != "" {
+		supported := false
+		for _, s := range rt.Supported {
+			if s == rt.Preferred {
+				supported = true
+				break
+			}
+		}
+		if !supported {
+			return fmt.Errorf("preferred runtime %q is not in the supported list %v", rt.Preferred, rt.Supported)
+		}
+	}
+
+	return nil
+}

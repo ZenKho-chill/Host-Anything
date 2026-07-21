@@ -12,11 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package template implements the Host Anything Template Engine.
-// It parses, validates, and manages service definitions defined in TOML
-// according to SPEC-001.
-//
-// A parsed template can be resolved against user-provided variables,
-// validating regex constraints, substituting variables into commands,
-// and optionally encrypting secret types before they are written to disk.
 package template
+
+// Valid types for ConfigVar.Type
+const (
+	ConfigTypeString  = "string"
+	ConfigTypeInt     = "int"
+	ConfigTypeBoolean = "boolean"
+	ConfigTypeSecret  = "secret"
+	ConfigTypeEnum    = "enum"
+)
+
+// Valid strategies for UpdateConfig.Strategy
+const (
+	UpdateStrategyRecreate = "recreate"
+	UpdateStrategyRolling  = "rolling"
+)
+
+// Valid protocols for NetworkConfig.Protocol
+const (
+	ProtocolTCP  = "tcp"
+	ProtocolUDP  = "udp"
+	ProtocolHTTP = "http"
+)
