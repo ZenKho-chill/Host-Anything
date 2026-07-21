@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { LogOut, Plus, Activity, Server, Box, ShoppingBag } from 'lucide-react';
+import { Plus, Activity, Server, Box, ShoppingBag, Cpu, HardDrive, Clock } from 'lucide-react';
 
 interface Service {
   id: string;
@@ -15,16 +15,12 @@ export const DashboardView: React.FC = () => {
 
   const fetchServices = async () => {
     try {
-      const res = await fetch('/api/v1/services', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      if (res.status === 401) {
-        localStorage.removeItem('token');
-        navigate('/login');
-        return;
+      // The interceptor in ConnectionOverlay handles the token injection and 401s
+      const res = await fetch('/api/v1/services');
+      if (res.ok) {
+        const data = await res.json();
+        setServices(data || []);
       }
-      const data = await res.json();
-      setServices(data || []);
     } catch (err) {
       console.error(err);
     }
@@ -37,68 +33,125 @@ export const DashboardView: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 animate-fade-in" style={{ margin: '0 auto' }}>
-      <div className="flex justify-between items-center mb-8">
+    <div className="animate-fade-in" style={{ width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Header Area */}
+      <div className="flex justify-between items-end mb-8 border-b border-[var(--border)] pb-6">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Server className="text-[var(--accent-primary)]" /> Dashboard
-          </h1>
-          <p className="text-[var(--text-muted)] mt-2">Manage your active deployments</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div style={{
+              background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-hover))',
+              padding: '10px',
+              borderRadius: '12px',
+              boxShadow: '0 4px 15px -3px var(--accent-primary)'
+            }}>
+              <Server className="text-white" size={24} />
+            </div>
+            <h1 className="text-4xl font-extrabold tracking-tight">System Overview</h1>
+          </div>
+          <p className="text-[var(--text-muted)] text-lg">Real-time status and telemetry of your deployments</p>
         </div>
-        <div className="flex gap-4">
-          <Button variant="secondary" onClick={() => navigate('/marketplace')}>
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={() => navigate('/marketplace')} style={{ border: '1px solid var(--border)' }}>
             <ShoppingBag size={18} /> Marketplace
           </Button>
-          <Button onClick={() => navigate('/templates')}>
-            <Plus size={18} /> Deploy Service
-          </Button>
-          <Button variant="secondary" onClick={() => { localStorage.removeItem('token'); navigate('/login'); }}>
-            <LogOut size={18} /> Logout
+          <Button onClick={() => navigate('/templates')} style={{ background: 'var(--accent-primary)', boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.3)' }}>
+            <Plus size={18} /> Deploy Instance
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <Card glass className="flex flex-col gap-2">
-          <div className="flex justify-between items-center text-[var(--text-secondary)]">
-            <span>Total Services</span>
-            <Box size={20} />
+      {/* Top Telemetry / Stats Grid */}
+      <div className="grid grid-cols-4 gap-6 mb-10">
+        <Card glass style={{ background: 'linear-gradient(145deg, var(--bg-secondary), var(--bg-primary))', borderTop: '2px solid var(--accent-primary)' }}>
+          <div className="flex justify-between items-start mb-4 text-[var(--text-secondary)]">
+            <span className="font-semibold text-sm uppercase tracking-wider">Total Services</span>
+            <div className="p-2 bg-[var(--bg-elevated)] rounded-lg"><Box size={18} className="text-[var(--accent-primary)]" /></div>
           </div>
-          <span className="text-3xl font-bold">{services.length}</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black">{services.length}</span>
+            <span className="text-sm text-[var(--text-muted)]">deployed</span>
+          </div>
         </Card>
-        <Card glass className="flex flex-col gap-2">
-          <div className="flex justify-between items-center text-[var(--text-secondary)]">
-            <span>Running</span>
-            <Activity size={20} className="text-[var(--success)]" />
+        
+        <Card glass style={{ background: 'linear-gradient(145deg, var(--bg-secondary), var(--bg-primary))', borderTop: '2px solid var(--success)' }}>
+          <div className="flex justify-between items-start mb-4 text-[var(--text-secondary)]">
+            <span className="font-semibold text-sm uppercase tracking-wider">Running</span>
+            <div className="p-2 bg-[var(--bg-elevated)] rounded-lg"><Activity size={18} className="text-[var(--success)]" /></div>
           </div>
-          <span className="text-3xl font-bold">
-            {services.filter(s => s.state === 'RUNNING').length}
-          </span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black">{services.filter(s => s.state === 'RUNNING').length}</span>
+            <span className="text-sm text-[var(--text-muted)]">online</span>
+          </div>
+        </Card>
+
+        <Card glass style={{ background: 'linear-gradient(145deg, var(--bg-secondary), var(--bg-primary))', borderTop: '2px solid var(--warning)' }}>
+          <div className="flex justify-between items-start mb-4 text-[var(--text-secondary)]">
+            <span className="font-semibold text-sm uppercase tracking-wider">CPU Load</span>
+            <div className="p-2 bg-[var(--bg-elevated)] rounded-lg"><Cpu size={18} className="text-[var(--warning)]" /></div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black">12%</span>
+            <span className="text-sm text-[var(--text-muted)]">avg</span>
+          </div>
+        </Card>
+
+        <Card glass style={{ background: 'linear-gradient(145deg, var(--bg-secondary), var(--bg-primary))', borderTop: '2px solid #8b5cf6' }}>
+          <div className="flex justify-between items-start mb-4 text-[var(--text-secondary)]">
+            <span className="font-semibold text-sm uppercase tracking-wider">Uptime</span>
+            <div className="p-2 bg-[var(--bg-elevated)] rounded-lg"><Clock size={18} className="text-[#8b5cf6]" /></div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black">99.9%</span>
+            <span className="text-sm text-[var(--text-muted)]">SLA</span>
+          </div>
         </Card>
       </div>
 
-      <h2 className="text-2xl font-bold mb-4">Active Services</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold tracking-tight">Active Deployments</h2>
+      </div>
+
       {services.length === 0 ? (
-        <Card glass className="flex flex-col items-center justify-center p-6 text-center" style={{ minHeight: '200px' }}>
-          <Box size={48} className="text-[var(--text-muted)] mb-4" />
-          <h3 className="text-xl font-medium mb-2">No services running</h3>
-          <p className="text-[var(--text-muted)] mb-4">You haven't deployed anything yet.</p>
-          <Button onClick={() => navigate('/templates')}>Browse Templates</Button>
+        <Card glass className="flex flex-col items-center justify-center p-12 text-center border-dashed border-2 border-[var(--border)] bg-transparent">
+          <div className="w-20 h-20 bg-[var(--bg-elevated)] rounded-full flex items-center justify-center mb-6">
+            <Box size={40} className="text-[var(--text-muted)]" />
+          </div>
+          <h3 className="text-2xl font-bold mb-3">No instances running</h3>
+          <p className="text-[var(--text-muted)] mb-8 max-w-md text-lg">Your workspace is empty. Deploy a new instance from a template or the marketplace to get started.</p>
+          <Button onClick={() => navigate('/templates')} size="lg" style={{ background: 'var(--accent-primary)' }}>
+            <Plus size={20} className="mr-2" /> Start First Deployment
+          </Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-2 gap-6">
           {services.map(svc => (
-            <Card key={svc.id} glass className="flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-lg">{svc.id}</h3>
-                <div className="flex items-center text-sm text-[var(--text-secondary)] mt-2">
-                  <span className={`status-dot ${svc.state.toLowerCase()}`}></span>
-                  {svc.state}
+            <Card key={svc.id} glass className="flex flex-col transition-all hover:-translate-y-1" style={{
+              background: 'linear-gradient(180deg, var(--bg-secondary) 0%, rgba(30, 33, 43, 0.4) 100%)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)'
+            }}>
+              <div className="flex justify-between items-start mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center border border-[var(--border)]">
+                    <HardDrive size={24} className="text-[var(--text-secondary)]" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-xl tracking-tight mb-1">{svc.id}</h3>
+                    <div className="flex items-center gap-2">
+                      <span className={`status-dot ${svc.state.toLowerCase()}`}></span>
+                      <span className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider">{svc.state}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-[var(--bg-elevated)] px-3 py-1 rounded-full text-xs font-mono text-[var(--text-muted)]">
+                  ID: {svc.id.substring(0, 8)}
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="sm">Logs</Button>
-                <Button variant="danger" size="sm">Stop</Button>
+              
+              <div className="mt-auto pt-4 border-t border-[var(--border)] flex gap-3 justify-end">
+                <Button variant="ghost" size="sm" className="font-medium">Configure</Button>
+                <Button variant="secondary" size="sm" className="font-medium border-[var(--border)]">Console Logs</Button>
+                <Button variant="danger" size="sm" className="font-medium bg-[rgba(239,68,68,0.1)] text-[var(--error)] hover:bg-[var(--error)] hover:text-white border-transparent">Stop Instance</Button>
               </div>
             </Card>
           ))}

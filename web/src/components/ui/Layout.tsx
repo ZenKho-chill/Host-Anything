@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Server, Users, Shield, Calendar, Settings, Folder, LayoutDashboard, ShoppingBag, LogOut } from 'lucide-react';
+import { clearToken } from '../../utils/auth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -74,7 +75,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         <div style={{ padding: '24px 12px' }}>
           <button
-            onClick={() => { localStorage.removeItem('token'); navigate('/login'); }}
+            onClick={() => { clearToken(); navigate('/login'); }}
             style={{
               width: '100%',
               display: 'flex', alignItems: 'center', gap: '12px',

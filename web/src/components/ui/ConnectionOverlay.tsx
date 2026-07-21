@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { WifiOff } from 'lucide-react';
+import { getToken, clearToken } from '../../utils/auth';
 
 export const ConnectionOverlay: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isOffline, setIsOffline] = useState(false);
@@ -11,7 +12,7 @@ export const ConnectionOverlay: React.FC<{ children: React.ReactNode }> = ({ chi
       let [resource, config] = args;
       
       // Auto-inject Authorization header
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (token) {
         if (typeof config === 'undefined') {
           config = {};
@@ -37,7 +38,7 @@ export const ConnectionOverlay: React.FC<{ children: React.ReactNode }> = ({ chi
 
         // Handle 401 Unauthorized globally
         if (response.status === 401) {
-          localStorage.removeItem('token');
+          clearToken();
           window.location.href = '/login';
         }
 

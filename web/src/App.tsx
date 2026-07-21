@@ -11,9 +11,10 @@ import { SettingsView } from './views/SettingsView';
 import { FilesView } from './views/FilesView';
 import { Layout } from './components/ui/Layout';
 import { ConnectionOverlay } from './components/ui/ConnectionOverlay';
+import { getToken } from './utils/auth';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   if (!token) {
     return <Navigate to="/login" />;
   }
