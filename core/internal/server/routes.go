@@ -15,6 +15,10 @@
 package server
 
 import (
+	"net/http"
+	"os"
+	"path/filepath"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/host-anything/hostanything/internal/api"
 )
@@ -44,4 +48,38 @@ func RegisterRoutes(r chi.Router, opts Options) {
 		r.Post("/api/v1/services", svcHandler.DeployService)
 		r.Get("/api/v1/services/{id}/logs", svcHandler.LogsService)
 	})
+
+	// Serve static frontend files from web/dist (if present)
+	workDir, _ := os.Getwd()
+	// Try to find the dist directory relative to the current working directory
+	// In production (when distributed as a .deb), files will likely be in /usr/share/hostanything/web
+	// For local dev, they are in ../web/dist or ./web/dist
+	distDirs := []string{
+		filepath.Join(workDir, "web", "dist"),
+		filepath.Join(workDir, "..", "web", "dist"),
+		"/usr/share/hostanything/web",
+	}
+
+	var staticDir string
+	for _, dir := range distDirs {
+		if stat, err := os.Stat(dir); err == nil && stat.IsDir() {
+			staticDir = dir
+			break
+		}
+	}
+
+	if staticDir != "" {
+		fs := http.FileServer(http.Dir(staticDir))
+		
+		// Fallback route for SPA (React Router)
+		r.Get("/*", func(w http.ResponseWriter, req *http.Request) {
+			path := filepath.Join(staticDir, req.URL.Path)
+			if stat, err := os.Stat(path); os.IsNotExist(err) || stat.IsDir() {
+				// If file doesn't exist or is a directory, serve index.html for SPA routing
+				http.ServeFile(w, req, filepath.Join(staticDir, "index.html"))
+				return
+			}
+			fs.ServeHTTP(w, req)
+		})
+	}
 }
