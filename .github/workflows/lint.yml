@@ -8,7 +8,7 @@ on:
 jobs:
   go-lint:
     name: Go Lint
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, debian]
     defaults:
       run:
         working-directory: ./core
@@ -36,7 +36,7 @@ jobs:
 
   web-lint:
     name: Web Lint
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, debian]
     defaults:
       run:
         working-directory: ./web
@@ -58,7 +58,7 @@ jobs:
 
   markdown-lint:
     name: Markdown Lint
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, debian]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4

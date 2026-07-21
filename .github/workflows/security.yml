@@ -15,7 +15,7 @@ permissions:
 jobs:
   security-scan:
     name: Security Vulnerability Scans
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, debian]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
