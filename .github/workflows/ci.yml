@@ -36,14 +36,12 @@ jobs:
 
       - name: Run Go Tests with Coverage
         run: go test -v ./... -coverprofile=coverage.out
-        env:
-          CGO_ENABLED: "1"
 
       - name: Check coverage threshold
         run: |
           total=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | tr -d '%')
           echo "Total coverage: ${total}%"
-          if (( $(echo "$total < 70" | bc -l) )); then
+          if awk -v t="$total" 'BEGIN { if (t < 70) exit 0; else exit 1 }'; then
             echo "Coverage ${total}% is below the 70% threshold"
             exit 1
           fi
