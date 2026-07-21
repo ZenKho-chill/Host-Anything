@@ -48,6 +48,10 @@ type AuthConfig struct {
 	// Fail2BanEnabled enables writing failed-login events to the auth log
 	// so that fail2ban can monitor and block repeated failures.
 	Fail2BanEnabled bool `toml:"fail2ban_enabled"`
+	// AdminUsername is the username for logging into the web UI.
+	AdminUsername string `toml:"admin_username"`
+	// AdminPassword is the bcrypt hash (or plain text if not hashed yet) of the admin password.
+	AdminPassword string `toml:"admin_password"`
 }
 
 // RuntimesConfig specifies which runtimes the daemon will use.

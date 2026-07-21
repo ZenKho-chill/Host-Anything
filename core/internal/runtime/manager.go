@@ -17,6 +17,7 @@ package runtime
 import (
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"sync"
 	"time"
@@ -124,4 +125,28 @@ func (sm *ServiceManager) StopService(serviceID, runtimeName string) error {
 
 	sm.setState(serviceID, types.ServiceStateStopped)
 	return nil
+}
+
+// ListServices returns a list of all currently tracked services and their states.
+func (sm *ServiceManager) ListServices() map[string]types.ServiceState {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	copy := make(map[string]types.ServiceState, len(sm.states))
+	for k, v := range sm.states {
+		copy[k] = v
+	}
+	return copy
+}
+
+// LogsService retrieves the log stream for a service.
+func (sm *ServiceManager) LogsService(ctx context.Context, serviceID, runtimeName string) (io.ReadCloser, error) {
+	sm.mu.RLock()
+	adapter, exists := sm.adapters[runtimeName]
+	sm.mu.RUnlock()
+
+	if !exists {
+		return nil, fmt.Errorf("manager.LogsService: adapter %q not registered", runtimeName)
+	}
+
+	return adapter.Logs(ctx, serviceID)
 }

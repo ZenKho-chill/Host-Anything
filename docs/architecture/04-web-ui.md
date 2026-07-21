@@ -8,17 +8,16 @@ The Web UI is the primary control plane for Host Anything. It is built as a Sing
 - **Build Tool**: Vite (chosen for fast cold starts and HMR)
 - **Language**: TypeScript (strict mode enabled for robustness)
 - **Routing**: React Router DOM
-- **State Management**: Zustand (lightweight, unopinionated, no boilerplate)
-- **Styling**: Tailwind CSS (rapid UI development, consistent design system)
-- **Data Fetching**: React Query (SWR) for caching, background updates, and pagination.
+- **Styling**: Vanilla CSS (Premium aesthetics with Dark Mode, Glassmorphism, Micro-animations)
+- **Data Fetching**: Native Fetch API
 
 ## Authentication Flow
 Security is paramount since Host Anything controls server infrastructure.
 
 1. **Login**: User submits credentials to `/api/v1/auth/login`.
-2. **JWT**: On success, the Core API returns an HttpOnly cookie containing a JWT, and a CSRF token.
-3. **Session**: The UI uses the CSRF token in subsequent API calls.
-4. **Fail2ban Integration**: If the login fails, the Go backend logs the failure (including IP address) to `/var/log/hostanything/auth.log`. The server administrator configures Fail2ban to monitor this file and block IPs with excessive failed attempts. The UI gracefully handles 429 Too Many Requests or connection drops resulting from bans.
+2. **JWT**: On success, the Core API returns a JSON response containing a JWT signed with HS256.
+3. **Session**: The UI stores the JWT in `localStorage` and sends it as a `Bearer` token in the `Authorization` header for subsequent API calls.
+4. **Fail2ban Integration**: If the login fails, the Go backend logs the failure (including IP address) as structured JSON. The server administrator configures Fail2ban to monitor this log and block IPs with excessive failed attempts. The UI gracefully handles 401 Unauthorized errors by redirecting to the login page.
 
 ## Key Views
 
@@ -33,4 +32,4 @@ Security is paramount since Host Anything controls server infrastructure.
 
 ## API Communication
 - **REST**: Standard CRUD operations (fetching templates, updating configs, starting/stopping services) use standard RESTful HTTP calls.
-- **WebSocket (Future/Planned)**: For real-time data streaming (live logs, instant status updates without polling), a WebSocket connection will be established upon entering the Service Detail view.
+- **Server-Sent Events (SSE)**: Real-time log streaming is implemented via HTTP chunked transfer and standard `text/event-stream`.

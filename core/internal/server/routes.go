@@ -19,14 +19,29 @@ import (
 	"github.com/host-anything/hostanything/internal/api"
 )
 
-// RegisterRoutes sets up all HTTP endpoints for the application.
+// RegisterRoutes sets up all API endpoints on the given router.
 func RegisterRoutes(r chi.Router, opts Options) {
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/health", api.HealthHandler(opts.Version, opts.EnabledRuntimes))
+	// Public Routes
+	r.Get("/api/v1/health", api.HealthHandler(opts.EnabledRuntimes))
+	r.Post("/api/v1/auth/login", api.AuthHandler(opts.Config, opts.Logger))
 
-		r.Route("/templates", func(r chi.Router) {
-			r.Get("/", api.TemplateListHandler(opts.Registry, opts.Logger))
-			r.Get("/{name}", api.TemplateGetHandler(opts.Registry, opts.Logger))
-		})
+	// Protected Routes
+	r.Group(func(r chi.Router) {
+		r.Use(api.AuthMiddleware(opts.Config.Auth.JWTSecret))
+
+		// Templates
+		r.Get("/api/v1/templates", api.TemplateListHandler(opts.Registry, opts.Logger))
+		r.Get("/api/v1/templates/{name}", api.TemplateGetHandler(opts.Registry, opts.Logger))
+
+		// Services
+		svcHandler := &api.ServiceHandler{
+			Manager:  opts.Manager,
+			Registry: opts.Registry,
+			Logger:   opts.Logger,
+			Key:      opts.MasterKey,
+		}
+		r.Get("/api/v1/services", svcHandler.ListServices)
+		r.Post("/api/v1/services", svcHandler.DeployService)
+		r.Get("/api/v1/services/{id}/logs", svcHandler.LogsService)
 	})
 }

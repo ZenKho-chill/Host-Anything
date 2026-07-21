@@ -27,20 +27,54 @@ Host Anything employs an adapter pattern to communicate with different runtimes 
 
 ## Quick Start
 
-> **🚧 Coming Soon**
-> 
-> Detailed quick start instructions will be provided as we get closer to our v0.1.0 release.
+### Prerequisites
+- [Go 1.22+](https://golang.org/doc/install)
+- [Node.js 20+](https://nodejs.org/) (for building the Web UI)
+- [Docker](https://docs.docker.com/get-docker/) (for running services via the default runtime)
+
+### Build and Run
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/hostanything/hostanything.git
+   cd hostanything
+   ```
+
+2. **Build the Core Backend:**
+   ```bash
+   cd core
+   go mod tidy
+   go build -o ../bin/hostanything ./cmd/hostanything
+   ```
+
+3. **Build the Web UI:**
+   ```bash
+   cd ../web
+   npm install
+   npm run build
+   ```
+
+4. **Start the Host Anything Daemon:**
+   Run the generated binary. By default, it will listen on port `8080`.
+   ```bash
+   cd ..
+   ./bin/hostanything
+   ```
+
+5. **Access the Dashboard:**
+   Open your browser and navigate to `http://localhost:8080`. 
+   *Default Login:* Username: `admin` / Password: `admin` *(You can change this in the `config.toml` that is generated in your data directory).*
 
 ## Roadmap
 
 | Milestone | Focus | Expected |
 | --------- | ----- | -------- |
-| **M1** | Core architecture & Template engine | Q3 2026 |
-| **M2** | Docker/Podman runtime adapters | Q4 2026 |
-| **M3** | Basic Web UI & Auth | Q1 2027 |
-| **M4** | Fail2Ban integration & Security | Q2 2027 |
-| **M5** | K8s runtime adapter | Q3 2027 |
-| **M6** | GitHub Marketplace Integration | Q4 2027 |
+| **M1** | Foundation (Config, Logging, Core API) | **Completed** |
+| **M2** | Template Engine & Encryption | **Completed** |
+| **M3** | Docker Runtime & Service Lifecycle | **Completed** |
+| **M4** | Web UI & Authentication | **Completed** |
+| **M5** | Multi-Runtime (Podman, K8s, Host) | Upcoming |
+| **M6** | GitHub Marketplace Integration | Upcoming |
 
 ## Contributing
 
