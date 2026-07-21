@@ -20,6 +20,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/host-anything/hostanything/internal/config"
@@ -63,7 +64,7 @@ func buildApp(configPath, version string) (*app, error) {
 		return nil, fmt.Errorf("buildApp: init template registry: %w", err)
 	}
 
-	masterKey, err := crypto.LoadOrCreateKey(cfg.Paths.DataDir)
+	masterKey, err := crypto.LoadOrCreateKey(filepath.Join(cfg.Paths.DataDir, "master.key"))
 	if err != nil {
 		return nil, fmt.Errorf("buildApp: load master key: %w", err)
 	}
