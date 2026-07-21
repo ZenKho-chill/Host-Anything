@@ -11,7 +11,7 @@ on:
 jobs:
   go-ci:
     name: Go Tests & Build
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, debian]
     defaults:
       run:
         working-directory: ./core

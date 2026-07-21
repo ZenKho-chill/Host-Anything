@@ -8,7 +8,7 @@ on:
 jobs:
   go-lint:
     name: Go Lint
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, debian]
     defaults:
       run:
         working-directory: ./core
